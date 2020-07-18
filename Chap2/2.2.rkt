@@ -1,5 +1,9 @@
 #lang racket
 
+;; used for demonstration purposes
+;; some of the functions are called to see the results in the top-level debugger
+
+
 ; used to demonstrate tracing in racket
 (require racket/trace)
 
