@@ -54,11 +54,9 @@
 (find-rule 'noun)
 
 (rule-lhs (find-rule 'noun-phrase))
-
 (rule-rhs (find-rule 'verb-phrase)) ; note- a list of a list
 (rule-rhs (find-rule 'verb)) ; note- just a list
 (rule-rhs (find-rule 'noun))
-
 
 ;; based on the first generate function in PAIP
 (define (generate phrase)
@@ -74,7 +72,6 @@
 ;    (rewrites 'a) will throw an error  "cddr: contract violation."
 ;    (find-rule 'a) will return false.
 
-
 ; top level checks
 (writeln "Checking the generate function")
 (print "sentence: ") (generate 'sentence)
@@ -82,8 +79,6 @@
 (print "sentence: ") (generate 'sentence)
 (print "article: ") (generate 'article)
 (print "noun-phrase: ") (generate 'noun-phrase)
-
-
 
 ;; alternatative way to write generate
 (define (generate/2 phrase)
@@ -101,15 +96,27 @@
 (print "article: ") (generate/2 'article)
 (print "noun-phrase: ") (generate/2 'noun-phrase)
 
-
-
-
 ;; exercise 2.1 - version of 'generate' that uses cond, but avoids
 ;; calling rewrite twice
 ;(define (generate/3 phrase))
 ; Actually already accomplished at #1. 
 
-          
+;; PAIP Answers exercise 2.1
+(define (generate/paip/2.1 phrase)
+  (let ([choices '()])
+    (cond
+      [(list? phrase) (mappend generate phrase)]
+      [(set! choices (rewrites phrase)) (generate (random-elt choices))]
+      [else (list phrase)])))
+
+(writeln "Checking the generate function, answer from PAIP 2.1")
+(print "sentence: ") (generate/paip/2.1 'sentence)
+(print "sentence: ") (generate/paip/2.1 'sentence)
+(print "sentence: ") (generate/paip/2.1 'sentence)
+(print "article: ") (generate/paip/2.1 'article)
+(print "noun-phrase: ") (generate/paip/2.1 'noun-phrase)
+
+         
 ;; exercise 2.2 'generate' that explicitly differentiates between
 ;; terminal and non-terminal symbols
 (define (generate/4 phrase)
@@ -125,7 +132,7 @@
           (generate (random-elt (rewrites phrase))))
       ; rule not found, therefore phrase is a terminal, and just return it
       (list phrase)))
-      
+
 (writeln "Checking the generate/4 function")
 (print "sentence: ") (generate/4 'sentence)
 (print "sentence: ") (generate/4 'sentence)
@@ -134,6 +141,21 @@
 (print "noun-phrase: ") (generate/4 'noun-phrase)
 
 
-    
+;; PAIP Answers exercise 2.2
+(define (generate/paip/2.2 phrase)
+  (define (non-terminal? category)
+    (not (null? (rewrites category))))
+  (cond
+    [(list? phrase) (mappend generate phrase)]
+    [(non-terminal? phrase)
+     (generate (random-elt (rewrites phrase)))]
+    [else (list phrase)]))
 
+(writeln "Checking the generate function, answer from PAIP 2.2")
+(print "sentence: ") (generate/paip/2.2 'sentence)
+(print "sentence: ") (generate/paip/2.2 'sentence)
+(print "sentence: ") (generate/paip/2.2 'sentence)
+(print "article: ") (generate/paip/2.2 'article)
+(print "noun-phrase: ") (generate/paip/2.2 'noun-phrase)
+    
 
