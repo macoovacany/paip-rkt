@@ -80,14 +80,25 @@
 (print "article: ") (generate 'article)
 (print "noun-phrase: ") (generate 'noun-phrase)
 
-;; alternatative way to write generate
+
+
 (define (generate/2 phrase)
   (if (list? phrase)
-      (mappend generate phrase)
-      (let ([choices (rewrites phrase)])
+      (mappend generate/2 phrase)
+      ; Bugfix: this function is not meant to call generate, but generate/2
+      ; making this fix breaks this function as per #1.
+      (let ([choices (rewrites/2 phrase)])
         (if (null? choices)
             (list phrase)
-            (generate (random-elt choices))))))
+            (generate/2 (random-elt choices))))))
+
+;; bug fixes to address #1
+(define (rewrites/2 rule)
+    (let [(r (find-rule rule))]
+      (if r
+          (rule-rhs r)
+          '())))
+
 
 (writeln "Checking the generate/2 function")
 (print "sentence: ") (generate/2 'sentence)
@@ -102,12 +113,15 @@
 ; Actually already accomplished at #1. 
 
 ;; PAIP Answers exercise 2.1
+;; not that the 
 (define (generate/paip/2.1 phrase)
   (let ([choices '()])
     (cond
-      [(list? phrase) (mappend generate phrase)]
-      [(set! choices (rewrites phrase)) (generate (random-elt choices))]
-      [else (list phrase)])))
+      [(list? phrase) (mappend generate/paip/2.1 phrase)]
+      [(set! choices (rewrites/2 phrase))  ; #1
+       (if (null? choices)
+           (list phrase)
+           (generate/paip/2.1 (random-elt choices)))])))
 
 (writeln "Checking the generate function, answer from PAIP 2.1")
 (print "sentence: ") (generate/paip/2.1 'sentence)
@@ -118,37 +132,16 @@
 
          
 ;; exercise 2.2 'generate' that explicitly differentiates between
-;; terminal and non-terminal symbols
-(define (generate/4 phrase)
-  (define (terminals-only? phrase)
-    (list? phrase))
-  ; check to see if the phrase represents a rule
-  ; and then check if it's a terminal, or subrule
-  (if (find-rule phrase) ; rule found
-      (if (terminals-only? phrase)
-          (mappend generate phrase) ; write out terminals
-          ; otherwise the phrase represents a rule that can be rewrriten
-          ; e.g. noun-phrase. recurse back into generate until terminals only
-          (generate (random-elt (rewrites phrase))))
-      ; rule not found, therefore phrase is a terminal, and just return it
-      (list phrase)))
-
-(writeln "Checking the generate/4 function")
-(print "sentence: ") (generate/4 'sentence)
-(print "sentence: ") (generate/4 'sentence)
-(print "sentence: ") (generate/4 'sentence)
-(print "article: ") (generate/4 'article)
-(print "noun-phrase: ") (generate/4 'noun-phrase)
-
+;; terminal and non-terminal symbols. Already accomplished by note #1
 
 ;; PAIP Answers exercise 2.2
 (define (generate/paip/2.2 phrase)
   (define (non-terminal? category)
-    (not (null? (rewrites category))))
+    (not (null? (rewrites/2 category))))
   (cond
-    [(list? phrase) (mappend generate phrase)]
+    [(list? phrase) (mappend generate/paip/2.2 phrase)]
     [(non-terminal? phrase)
-     (generate (random-elt (rewrites phrase)))]
+     (generate/paip/2.2 (random-elt (rewrites/2 phrase)))]
     [else (list phrase)]))
 
 (writeln "Checking the generate function, answer from PAIP 2.2")
